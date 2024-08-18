@@ -1,0 +1,28 @@
+{% extends "auctions/layout.html" %}
+{% block title %}
+   New Listing
+{% endblock %}
+
+{% block body %}
+    <h2>Add a new listing here:</h2>
+    <form action="{% url 'add' %}" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="col-auto">
+            <div style="text-transform: capitalize">{{field.label}}</div>
+            {{ field }} <br/>
+        </div>  
+        {% endfor %}
+        <br/>
+        <div class="col-auto">
+            <input type="submit" class="btn btn-primary me-md-2">
+        </div>
+        <br/> 
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert {% if message.tags %}alert-danger {% endif %}" role="alert">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+       
+    </form>
+{% endblock %} 

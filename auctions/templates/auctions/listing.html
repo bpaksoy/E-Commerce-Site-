@@ -1,0 +1,80 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <div class="col d-flex justify-content-left"> 
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert {% if message.tags %}alert-danger {% endif %}" role="alert">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    </div>    
+    <div class="col d-flex justify-content-center">
+        <div class="row">
+            <div class="col-md-12 border">
+                    <div class="card-header col-md-6">
+                        <img  style="max-width:350px;" src={{listing.image.url}}  class="card-img-top" alt="img">
+                        <footer class="blockquote-footer">Listing created at: <cite title="Source Title">{{listing.created_at}}</cite></footer>  
+                        <footer class="blockquote-footer">Listed by {{listing.author}}</footer> 
+                    </div>
+                    <div class="card-body col-md-12">
+                        <h5 class="card-title">{{listing.title }}</h5>
+                        <p class="card-text">
+                           
+                        <ul>
+                            <a href="{% url 'show_categories' listing.category %}"><li>Category: {{ listing.category }}</li></a>
+                            <li>Description: {{ listing.content }}</li>
+                            <li>Price: ${{ listing.starting_price }}</li>
+                        </ul>
+                        </p>
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'add_to_watchlist' listing.id %}" class="btn btn-outline-primary btn-sm">Add to watchlist</a>
+                            {% if listing.status %}
+                                {% if user == listing.author %}
+                                    <a href="{% url 'close_auction' listing.id %}" class="btn btn-outline-primary btn-sm">Close auction</a>
+                                {% else %}
+                                    <a href="{% url 'place_bid' listing.id %}" class="btn btn-outline-primary btn-sm">Place bid</a>
+                                {% endif %}
+                            {% endif %}
+                        {% endif %}
+                        <a href="{% url 'index' %}" class="btn btn-outline-secondary btn-sm">All Listings</a>
+                    </div>
+            </div>
+       
+        </div>
+        <div class="col-md-6 border">
+            <div class="card-body col-md-12">
+                <h3>Bidding History</h3>
+                {% if not listing.bids.all %}
+                <p> No bids yet... </p>
+                {% else %}
+                    {% for bid in listing.bids.all %}
+                    <strong>
+                        {{ bid.user }},
+                        {{ bid.date_of_bid }} 
+                    </strong><br/>
+                    <p>${{bid.bid}}</p>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            <div class="card-body col-md-12">
+                <h3>Comments...</h3>
+                {% if not listing.comments.all %}
+                <p> No comments yet... </p>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'add_comment' listing.id %}">Add a comment</a>
+                {% endif %}
+                {% else %}
+                {% for comment in listing.comments.all %}
+                <strong>
+                    {{ comment.user }}
+                    {{ comment.date_created }} 
+                </strong><br/>
+                <p>{{ comment.body }}</p>
+                {% endfor %}
+
+                {% endif %}
+            </div>
+       </div> 
+    </div><br/>
+   
+{% endblock %}

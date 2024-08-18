@@ -1,0 +1,38 @@
+{% extends "auctions/layout.html" %}
+{% block title %}
+   New Comment
+{% endblock %}
+
+{% block body %}
+<div>
+    <div class="card-header col-md-2">
+        <img  style="max-width:150px;" src={{listing.image.url}}  class="card-img-top" alt="img">
+    </div>
+    <div class="card-body col-md-2 border">
+        <h5 class="card-title">{{listing.title }}</h5>
+    </div>
+</div><br/>
+{% if user.is_authenticated %}
+    <form action="{% url 'add_comment' listing.id %}" method="POST">
+        <div class="col-auto">
+            <h5>Add a new comment here:</h5>
+        </div>
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="col-auto">
+            {{ field }}
+        </div>  
+        {% endfor %}
+        <br/>
+        <div class="col-auto">
+            <input type="submit" class="btn btn-primary me-md-2">
+        </div>
+        <br/> 
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert {% if message.tags %}alert-danger {% endif %}" role="alert">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    </form>
+{% endif %}
+{% endblock %} 

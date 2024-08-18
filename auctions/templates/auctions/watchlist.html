@@ -1,0 +1,46 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 border">
+                <h1>Watchlist</h1>
+            </div> 
+        </div>
+       
+        <div class="row">
+            {% if watchlist|length %}
+                {% for item in watchlist %}
+                <div class="card col-md-4" style="gap:20px">
+                    <div class="card-header">
+                        <div class="col-md-12">
+                            <img src={{item.image.url}}  class="card-img-top" alt="img">
+                        </div>
+                    </div>
+                    
+                    <div class="card-body col-md-12">
+                        <h5 class="card-title">{{item.title }}</h5>
+                        <p class="card-text">
+                        <ul>
+                            <li>Description: {{item.content }}</li>
+                            <li>Price: ${{ item.starting_price }}</li>
+                        </ul>
+                        </p>
+                    </div>
+                    <div class="card-footer text-muted">
+                        <a href="{% url 'listing' item.id %}" class="btn btn-outline-secondary btn-sm">Listing detail</a>
+                        <a href="{% url 'remove' item.id %}" class="btn btn-outline-danger btn-sm">Remove listing</a>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+        <div class="card-body col-md-4 border">
+           <p>Nothing on your watchlist yet</p>
+        </div>
+        {% endif %}
+        </div><br/>
+        <a href="{% url 'index' %}" class="btn btn-outline-secondary btn-sm">All Listings</a>
+    </div> 
+    <br>
+  
+{% endblock %}
