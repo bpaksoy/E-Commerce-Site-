@@ -6,8 +6,8 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import *
-from .forms import *
+from .models import User, Category, Listing, Watchlist, Comment, Bid
+from .forms import NewListingForm, NewCommentForm, NewBidForm
 
 
 def get_listings():
@@ -30,10 +30,7 @@ def index(request):
             "listings": listings
         })
     else:
-        try:
-            user_list = Watchlist.objects.get(user=request.user)
-        except:
-            user_list = None
+        user_list = Watchlist.objects.filter(user=request.user).first()
         if not user_list:
             return render(request, "auctions/index.html", {
                 "listings": listings
@@ -54,10 +51,7 @@ def active_listings(request):
             "listings": listings
         })
     else:
-        try:
-            user_list = Watchlist.objects.get(user=request.user)
-        except:
-            user_list = None
+        user_list = Watchlist.objects.filter(user=request.user).first()
         if not user_list:
             return render(request, "auctions/active.html", {
                 "listings": listings
@@ -136,7 +130,7 @@ def add_listing(request):
         try:
             print("Successfully saved!!")
             return HttpResponseRedirect(reverse("index"))
-        except:
+        except Exception:
             messages.error(
                 request, "This listing was not saved in the system.")
             return render(request, "auctions/add.html", {
@@ -151,17 +145,13 @@ def add_listing(request):
 # Show a list of watched items
 @ login_required
 def watchlist(request):
-    try:
-        user_list = Watchlist.objects.get(user=request.user)
-    except:
-        user_list = None
+    user_list = Watchlist.objects.filter(user=request.user).first()
 
     if not user_list:
         return render(request, "auctions/watchlist.html", {
             "watchlist": []
         })
     else:
-        user_list = Watchlist.objects.get(user=request.user)
         watchlist = user_list.listings.all()
         count = watchlist.count
         return render(request, "auctions/watchlist.html", {
@@ -205,8 +195,12 @@ def listing(request, listing_id):
     if request.user.is_authenticated:
         user = request.user
         if not listing.status:
-            bid_list = Bid.objects.get(listing_id=listing_id, win=True)
-            winner = bid_list.user
+            try:
+                bid_list = Bid.objects.get(listing_id=listing_id, win=True)
+                winner = bid_list.user
+            except Bid.DoesNotExist:
+                winner = None
+            
             if winner == user:
                 messages.success(
                     request, "Congratulations! You have won this auction.")
@@ -309,10 +303,10 @@ def place_bid(request, listing_id):
             bid.listing = listing
             bid.user = request.user
             if len(bid_list):
-                max = bid_list.order_by('-bid')[0]
-                if bid.bid <= max.bid:
+                highest_bid = bid_list.order_by('-bid')[0]
+                if bid.bid <= highest_bid.bid:
                     messages.error(
-                        request, f"The bid needs to be more than the highest bid of ${max.bid}")
+                        request, f"The bid needs to be more than the highest bid of ${highest_bid.bid}")
                     return HttpResponseRedirect(reverse("listing", args=(listing_id,)))
 
             if bid.bid < listing.starting_price:
